@@ -1,7 +1,7 @@
 package main
 
 import (
-	"awesomeProject2/impl"
+	"WebSocket-golang-demo/impl"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"time"
