@@ -1,9 +1,9 @@
 package impl
 
 import (
+	"errors"
 	"github.com/gorilla/websocket"
 	"sync"
-	"errors"
 )
 
 type Connection struct {
@@ -11,8 +11,8 @@ type Connection struct {
 	inChan    chan []byte
 	outChan   chan []byte
 	closeChan chan []byte
-	mutex sync.Mutex
-	isClosed bool
+	mutex     sync.Mutex
+	isClosed  bool
 }
 
 func InitConnection(wsConn *websocket.Conn) (conn *Connection, err error) {
@@ -39,10 +39,10 @@ func (conn *Connection) ReadMessage() (data []byte, err error) {
 	return
 }
 
-func (conn *Connection) WriteMessage(data []byte)(err error) {
+func (conn *Connection) WriteMessage(data []byte) (err error) {
 	select {
 	case conn.outChan <- data:
-	case <- conn.closeChan:
+	case <-conn.closeChan:
 		err = errors.New("connection is closed")
 	}
 	return
@@ -97,7 +97,6 @@ func (conn *Connection) writeLoop() {
 		case <-conn.closeChan:
 			goto ERR
 		}
-
 
 		if err = conn.wsConn.WriteMessage(websocket.TextMessage, data); err != nil {
 			goto ERR

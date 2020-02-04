@@ -16,28 +16,28 @@ var (
 	}
 )
 
-func wsHandler(w http.ResponseWriter, r *http.Request)  {
+func wsHandler(w http.ResponseWriter, r *http.Request) {
 	var (
 		wsConn *websocket.Conn
-		err error
-		conn *impl.Connection
-		data []byte
+		err    error
+		conn   *impl.Connection
+		data   []byte
 	)
-	if wsConn,err = upgrader.Upgrade(w,r,nil);err!=nil{
+	if wsConn, err = upgrader.Upgrade(w, r, nil); err != nil {
 		return
 	}
 
-	if conn,err = impl.InitConnection(wsConn);err!= nil{
+	if conn, err = impl.InitConnection(wsConn); err != nil {
 		goto ERR
 	}
 
 	go func() {
-		var(
+		var (
 			err error
 		)
 
-		for{
-			if err = conn.WriteMessage([]byte("heartbeat"));err != nil {
+		for {
+			if err = conn.WriteMessage([]byte("heartbeat")); err != nil {
 				return
 			}
 
@@ -45,23 +45,20 @@ func wsHandler(w http.ResponseWriter, r *http.Request)  {
 		}
 	}()
 
-	for{
-		if data,err = conn.ReadMessage();err != nil {
+	for {
+		if data, err = conn.ReadMessage(); err != nil {
 			goto ERR
 		}
 
-		if err = conn.WriteMessage(data);err!= nil {
+		if err = conn.WriteMessage(data); err != nil {
 			goto ERR
 		}
 	}
 
-	ERR:
+ERR:
 }
 
 func main() {
-	http.HandleFunc("/ws",wsHandler)
-	http.ListenAndServe("0.0.0.0:7777",nil)
+	http.HandleFunc("/ws", wsHandler)
+	http.ListenAndServe("0.0.0.0:7777", nil)
 }
-
-
-
